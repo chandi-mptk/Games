@@ -1,22 +1,26 @@
-import sqlite3
 from pathlib import Path
 from random import choice
 from string import ascii_uppercase
+import json
 
 
-DB = "/home/nishanth/Desktop/GITHUB/Games/DATA/olamdb.db"
+DB = "game_data.json"
 
 class WordGuessing:
     def __init__(self, db):
         
+        # Get Current working directory using Path
+        cwd = Path.cwd()
+        path = cwd / db
+
         # Check file Available
-        if not Path(DB).is_file():
-            print(f"File Not Found: {DB}")
+        if not path.is_file():
             quit()
-        self.db = db
+
+        self.json_file = path
         self.level = 0
         self.attempt = 0
-        self.olam_data = None
+        self.base_data = {}
         self.game_data = {}
         self.eng_word = ""
         self.eng_word_show = ""
@@ -24,13 +28,10 @@ class WordGuessing:
     
     def fetch_data(self):
         try:
-            self.conn = sqlite3.connect(self.db)
-            self.cursor = self.conn.cursor()
-            
-            # Select english and malayalam from olam table
-            self.cursor.execute("SELECT english, malayalam FROM olam")
-            self.olam_data = self.cursor.fetchall()
-        except sqlite3.Error as e:
+            # Fetch data from self.json_file
+            with open(self.json_file) as f:
+                self.base_data = json.load(f)
+        except Exception as e:
             print(e)
             return False
         return True
@@ -40,8 +41,8 @@ class WordGuessing:
     
     def filter_data(self):
         try:
-            # Iterate over olam_data
-            for eng, mal in self.olam_data:
+            # Iterate over base_data
+            for eng, mal in self.base_data.items():
                 eng = eng.strip().upper()
                 # Check if eng contain other than ascii_uppercase
                 if not all(c in ascii_uppercase for c in eng):
@@ -72,7 +73,6 @@ class WordGuessing:
         self.attempt = self.attempt_calc
         
     def show_question(self):
-        print(self.eng_word)
         return self.mal_word, self.eng_word_show
     
     def is_answer_ok(self, answer):
