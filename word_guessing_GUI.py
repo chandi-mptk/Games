@@ -146,7 +146,6 @@ class GUI:
                 showerror("Lost", "You lost the Game.")
                 self.remove_answer_area()
                 self.create_start_button()
-                self.word_prediction.reset_game()
         self.answer.set("")
 
 
